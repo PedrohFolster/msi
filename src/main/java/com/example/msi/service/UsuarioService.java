@@ -9,23 +9,28 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.msi.dto.UsuarioDTO;
 import com.example.msi.entities.Usuario;
 import com.example.msi.entities.UsuarioAutenticar;
+import com.example.msi.entities.UserStatus;
 import com.example.msi.exception.UsuarioException;
 import com.example.msi.exception.UsuarioValidationException;
 import com.example.msi.repository.UsuarioAutenticarRepository;
 import com.example.msi.repository.UsuarioRepository;
+import com.example.msi.repository.UserStatusRepository;
 
 @Service
 public class UsuarioService {
 
     private final UsuarioRepository repository;
     private final UsuarioAutenticarRepository autenticarRepository;
+    private final UserStatusRepository userStatusRepository;
     private final PasswordEncoder passwordEncoder;
 
     public UsuarioService(UsuarioRepository repository, 
                          UsuarioAutenticarRepository autenticarRepository,
+                         UserStatusRepository userStatusRepository,
                          PasswordEncoder passwordEncoder) {
         this.repository = repository;
         this.autenticarRepository = autenticarRepository;
+        this.userStatusRepository = userStatusRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -40,7 +45,12 @@ public class UsuarioService {
         Usuario usuario = new Usuario();
         preencherUsuario(usuario, dto);
         
-        // Define ROLE_USER como padrão
+        // Define o status como ativo (ID 1) automaticamente
+        UserStatus statusAtivo = userStatusRepository.findById(1L)
+                .orElseThrow(() -> new RuntimeException("Status ativo não encontrado"));
+        usuario.setStatus(statusAtivo);
+
+        // Define a role do usuário
         String role = dto.getRole() != null && dto.getRole().equalsIgnoreCase("admin") 
             ? "ROLE_ADMIN" 
             : "ROLE_USER";
@@ -56,7 +66,7 @@ public class UsuarioService {
         // Cria e salva o usuário para autenticação
         UsuarioAutenticar usuarioAuth = new UsuarioAutenticar();
         usuarioAuth.setEmail(usuario.getEmail());
-        usuarioAuth.setSenha(senhaEncoded); // Usa a mesma senha codificada
+        usuarioAuth.setSenha(senhaEncoded);
         usuarioAuth.setPerfil(usuario.getRole());
         
         autenticarRepository.save(usuarioAuth);
