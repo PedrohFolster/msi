@@ -2,6 +2,7 @@ package com.example.msi.security;
 
 import java.util.Collection;
 import java.util.List;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,12 +28,12 @@ public class UserAuthenticated implements UserDetails {
 
     @Override
     public String getPassword() {
-        return usuario.getPassword();
+        return usuario.getSenha();
     }
 
     @Override
     public String getUsername() {
-        return usuario.getLogin();
+        return usuario.getEmail();
     }
 
     @Override

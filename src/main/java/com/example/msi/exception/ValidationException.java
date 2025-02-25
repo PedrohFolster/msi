@@ -9,9 +9,9 @@ public class ValidationException extends RuntimeException {
         super(message);
     }
 
-    public static class LoginObrigatorioException extends ValidationException {
-        public LoginObrigatorioException() {
-            super("Login é obrigatório");
+    public static class EmailObrigatorioException extends ValidationException {
+        public EmailObrigatorioException() {
+            super("Email é obrigatório");
         }
     }
 

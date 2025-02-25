@@ -1,25 +1,35 @@
 package com.example.msi.service;
 
-import com.example.msi.dto.UsuarioDTO;
-import com.example.msi.entities.Usuario;
-import com.example.msi.exception.UsuarioValidationException;
-import com.example.msi.exception.UsuarioException;
-import com.example.msi.repository.UsuarioRepository;
+import java.util.List;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.msi.dto.UsuarioDTO;
+import com.example.msi.entities.Usuario;
+import com.example.msi.entities.UsuarioAutenticar;
+import com.example.msi.exception.UsuarioException;
+import com.example.msi.exception.UsuarioValidationException;
+import com.example.msi.repository.UsuarioAutenticarRepository;
+import com.example.msi.repository.UsuarioRepository;
 
 @Service
 public class UsuarioService {
 
     private final UsuarioRepository repository;
+    private final UsuarioAutenticarRepository autenticarRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UsuarioService(UsuarioRepository repository, PasswordEncoder passwordEncoder) {
+    public UsuarioService(UsuarioRepository repository, 
+                         UsuarioAutenticarRepository autenticarRepository,
+                         PasswordEncoder passwordEncoder) {
         this.repository = repository;
+        this.autenticarRepository = autenticarRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional
     public Usuario criar(UsuarioDTO dto) {
         validarCamposObrigatorios(dto);
         
@@ -36,7 +46,18 @@ public class UsuarioService {
             : "ROLE_USER";
         usuario.setRole(role);
 
-        return repository.save(usuario);
+        // Salva o usuário principal
+        usuario = repository.save(usuario);
+        
+        // Cria e salva o usuário para autenticação
+        UsuarioAutenticar usuarioAuth = new UsuarioAutenticar();
+        usuarioAuth.setEmail(usuario.getEmail());
+        usuarioAuth.setSenha(usuario.getSenha()); // Já está codificada
+        usuarioAuth.setPerfil(usuario.getRole());
+        
+        autenticarRepository.save(usuarioAuth);
+        
+        return usuario;
     }
 
     public Usuario buscarPorId(Long id) {

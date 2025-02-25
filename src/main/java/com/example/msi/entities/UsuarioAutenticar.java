@@ -2,6 +2,7 @@ package com.example.msi.entities;
 
 import com.example.msi.dto.UsuarioAutenticarDTO;
 import com.example.msi.util.Hashing;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,21 +15,21 @@ public class UsuarioAutenticar {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String login;
-    private String password;
+    private String email;
+    private String senha;
     private String perfil;
 
-    public UsuarioAutenticar(Long id, String login, String password, String perfil) {
+    public UsuarioAutenticar(Long id, String email, String senha, String perfil) {
         this.id = id;
-        this.login = login;
-        this.password = Hashing.hash(password);
+        this.email = email;
+        this.senha = Hashing.hash(senha);
         this.perfil = perfil;
     }
 
     public UsuarioAutenticar(UsuarioAutenticarDTO dto) {
         this.id = dto.getId();
-        this.login = dto.getLogin();
-        this.password = Hashing.hash(dto.getPassword());
+        this.email = dto.getEmail();
+        this.senha = Hashing.hash(dto.getSenha());
         this.perfil = dto.getPerfil();
     }
 
@@ -41,17 +42,22 @@ public class UsuarioAutenticar {
     public void setId(Long id) {
         this.id = id;
     }
-    public String getLogin() {
-        return login;
+    public String getEmail() {
+        return email;
     }
-    public void setLogin(String login) {
-        this.login = login;
+    public void setEmail(String email) {
+        this.email = email;
     }
-    public String getPassword() {
-        return password;
+    public String getSenha() {
+        return senha;
     }
-    public void setPassword(String password) {
-        this.password = Hashing.hash(password);
+    public void setSenha(String senha) {
+        // Verifica se a senha já está codificada (começa com $2a$)
+        if (senha != null && senha.startsWith("$2a$")) {
+            this.senha = senha;
+        } else {
+            this.senha = Hashing.hash(senha);
+        }
     }
     public String getPerfil() {
         return perfil;
