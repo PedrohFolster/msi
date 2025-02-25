@@ -39,7 +39,6 @@ public class AuthenticationController {
             new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getSenha())
         );
     
-        // Verifica se o usuário tem a role "ROLE_DELETED"
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         if (userDetails.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_DELETED"))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Usuário inativo ou deletado");

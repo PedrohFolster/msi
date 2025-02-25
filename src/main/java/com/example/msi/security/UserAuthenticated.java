@@ -53,6 +53,6 @@ public class UserAuthenticated implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return !usuario.getRole().equals("ROLE_DELETED"); 
+        return !usuario.getRole().equals("ROLE_DELETED");
     }
 }

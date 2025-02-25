@@ -34,14 +34,14 @@ public class JwtService {
         // Obtém as roles do usuário
         String scope = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(" ")); // Concatena as roles em uma string
+                .collect(Collectors.joining(" "));
     
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("msi")
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(expiry))
                 .subject(authentication.getName())
-                .claim("scope", scope) // Adiciona as permissões ao token
+                .claim("scope", scope)
                 .build();
     
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();

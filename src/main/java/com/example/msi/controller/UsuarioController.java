@@ -2,18 +2,22 @@ package com.example.msi.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.msi.dto.UsuarioDTO;
+import com.example.msi.dto.UsuarioResponseDTO;
 import com.example.msi.entities.Usuario;
 import com.example.msi.service.UsuarioService;
 
@@ -30,8 +34,9 @@ public class UsuarioController {
     }
 
     @GetMapping
-    public List<Usuario> listarTodos() {
-        return service.listarTodos();
+    public List<UsuarioResponseDTO> listarTodos(@RequestParam(defaultValue = "1") int page) {
+        Pageable pageable = PageRequest.of(page - 1, 5); // Retorna 5 usuários
+        return service.listarTodosResponse(pageable);
     }
 
     @GetMapping("/{id}")
@@ -44,19 +49,18 @@ public class UsuarioController {
         return service.atualizar(id, dto);
     }
 
-    // Endpoint para inativar um usuário
     @PostMapping("/inativar/{id}")
-    @PreAuthorize("hasRole('ADMIN')") // Apenas administradores podem acessar este endpoint
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> inativarUsuario(@PathVariable Long id) {
-        service.inativar(id); // Chama o método de inativação do serviço
+        service.inativar(id);
         return ResponseEntity.ok("Usuário inativado com sucesso.");
     }
 
     // Endpoint para excluir um usuário do banco
     @DeleteMapping("/excluir/{id}")
-    @PreAuthorize("hasRole('ADMIN')") // Apenas administradores podem acessar este endpoint
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> excluirUsuario(@PathVariable Long id) {
-        service.deletar(id); // Chama o método de deleção do serviço
+        service.deletar(id);
         return ResponseEntity.ok("Usuário excluído com sucesso.");
     }
 } 

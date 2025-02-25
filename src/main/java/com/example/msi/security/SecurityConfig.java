@@ -56,12 +56,12 @@ public class SecurityConfig {
         http
             .csrf().disable() // Desabilita CSRF para APIs
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(PublicUrls.URLS).permitAll() // Permite acesso a URLs públicas
+                .requestMatchers(PublicUrls.URLS).permitAll()
                 .requestMatchers(HttpMethod.DELETE, "/usuarios/**").hasRole("ADMIN") // Permite apenas para ADMIN no método DELETE
-                .anyRequest().authenticated() // Qualquer outra requisição deve estar autenticada
+                .anyRequest().authenticated()
             )
             .oauth2ResourceServer()
-                .jwt() // Configura o uso de JWT
+                .jwt()
                 .jwtAuthenticationConverter(jwtAuthenticationConverter()); // Converte JWT para autenticação
 
         return http.build();

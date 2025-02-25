@@ -1,13 +1,17 @@
 package com.example.msi.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.msi.dto.UsuarioDTO;
+import com.example.msi.dto.UsuarioResponseDTO;
 import com.example.msi.entities.Usuario;
 import com.example.msi.entities.UsuarioAutenticar;
 import com.example.msi.exception.UsuarioException;
@@ -42,30 +46,28 @@ public class UsuarioService {
         Usuario usuario = new Usuario();
         preencherUsuario(usuario, dto);
         
-        // Define a role do usuário com base no DTO
         String role = dto.getRole() != null && dto.getRole().equalsIgnoreCase("admin") 
             ? "ROLE_ADMIN" 
             : dto.getRole() != null && dto.getRole().equalsIgnoreCase("deleted") 
             ? "ROLE_DELETED" 
-            : "ROLE_USER"; // Define a role como ROLE_USER por padrão
-        usuario.setRole(role); // Atribui a role ao usuário
+            : "ROLE_USER";
+        usuario.setRole(role);
     
         // Codifica a senha usando BCrypt
         String senhaEncoded = passwordEncoder.encode(dto.getSenha());
         usuario.setSenha(senhaEncoded);
     
-        // Salva o usuário principal
-        usuario = repository.save(usuario); // O ID deve ser gerado automaticamente aqui
+        usuario = repository.save(usuario);
         
         // Cria e salva o usuário para autenticação
         UsuarioAutenticar usuarioAuth = new UsuarioAutenticar();
         usuarioAuth.setEmail(usuario.getEmail());
-        usuarioAuth.setSenha(senhaEncoded); // Usa a mesma senha codificada
-        usuarioAuth.setRole(usuario.getRole()); // Usa a role do usuário
+        usuarioAuth.setSenha(senhaEncoded);
+        usuarioAuth.setRole(usuario.getRole());
         
         autenticarRepository.save(usuarioAuth);
         
-        return usuario; // O usuário deve ter um ID gerado
+        return usuario;
     }
 
     public Usuario buscarPorId(Long id) {
@@ -73,8 +75,20 @@ public class UsuarioService {
             .orElseThrow(() -> new UsuarioException.UsuarioNaoEncontradoException("Usuário não encontrado"));
     }
 
-    public List<Usuario> listarTodos() {
-        return repository.findAll();
+    public Page<Usuario> listarTodos(Pageable pageable) {
+        return repository.findAll(pageable);
+    }
+
+    public List<UsuarioResponseDTO> listarTodosResponse(Pageable pageable) {
+        Page<Usuario> usuarios = repository.findAll(pageable);
+        return usuarios.getContent().stream()
+                .map(usuario -> new UsuarioResponseDTO(
+                    usuario.getId(), 
+                    usuario.getNome(), 
+                    usuario.getEmail(), 
+                    usuario.getDataNascimento() != null ? usuario.getDataNascimento().toString() : null,
+                    usuario.getRole()))
+                .collect(Collectors.toList());
     }
 
     public Usuario atualizar(Long id, UsuarioDTO dto) {
@@ -106,19 +120,18 @@ public class UsuarioService {
         repository.save(usuario);
     }
 
-        // Método para deletar um usuário do banco de dados
-        @Transactional
-        public void deletar(Long id) {
-            Usuario usuario = repository.findById(id)
-                    .orElseThrow(() -> new UsuarioException.UsuarioNaoEncontradoException("Usuário não encontrado"));
-    
-            UsuarioAutenticar usuarioAutenticar = autenticarRepository.findByEmail(usuario.getEmail())
-                    .orElseThrow(() -> new UsuarioException.UsuarioNaoEncontradoException("Usuário de autenticação não encontrado"));
-    
-            autenticarRepository.delete(usuarioAutenticar);
-    
-            repository.delete(usuario);
-        }
+    @Transactional
+    public void deletar(Long id) {
+        Usuario usuario = repository.findById(id)
+                .orElseThrow(() -> new UsuarioException.UsuarioNaoEncontradoException("Usuário não encontrado"));
+
+        // Verifica se o usuário de autenticação existe antes de tentar excluí-lo
+        UsuarioAutenticar usuarioAutenticar = autenticarRepository.findByEmail(usuario.getEmail())
+                .orElseThrow(() -> new UsuarioException.UsuarioNaoEncontradoException("Usuário de autenticação não encontrado"));
+
+        autenticarRepository.delete(usuarioAutenticar);
+        repository.delete(usuario);
+    }
 
     private void validarCamposObrigatorios(UsuarioDTO dto) {
         if (dto.getNome() == null || dto.getNome().trim().isEmpty()) {
@@ -139,7 +152,6 @@ public class UsuarioService {
         usuario.setNome(dto.getNome());
         usuario.setEmail(dto.getEmail());
         usuario.setDataNascimento(dto.getDataNascimento());
-        // A senha será codificada separadamente
     }
 
     public boolean existsByRole(String role) {

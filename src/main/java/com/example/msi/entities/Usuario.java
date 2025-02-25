@@ -21,9 +21,9 @@ public class Usuario {
     @JsonIgnore
     private String senha;
 
-    private String role; // Campo para armazenar o papel do usuário
+    private String role;
 
-    // Getters e Setters
+
     public Long getId() {
         return id;
     }
@@ -65,10 +65,10 @@ public class Usuario {
     }
 
     public String getRole() {
-        return role; // Getter para o papel do usuário
+        return role;
     }
 
     public void setRole(String role) {
-        this.role = role; // Setter para o papel do usuário
+        this.role = role;
     }
 }
