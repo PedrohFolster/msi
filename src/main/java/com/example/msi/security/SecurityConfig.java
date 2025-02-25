@@ -28,6 +28,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.access.AccessDeniedException;
 
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -37,6 +39,7 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
 import java.util.stream.Collectors;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -108,9 +111,16 @@ public class SecurityConfig {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(jwt -> {
             // Mapeia os escopos do JWT para GrantedAuthority
-            return jwt.getClaimAsStringList("scope").stream()
-                    .map(SimpleGrantedAuthority::new) // Mapeia diretamente para GrantedAuthority
+            List<GrantedAuthority> authorities = jwt.getClaimAsStringList("scope").stream()
+                    .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toList());
+
+            // Verifica se o usuário tem a role "ROLE_DELETED"
+            if (authorities.stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_DELETED"))) {
+                throw new AccessDeniedException("Usuário inativo ou deletado");
+            }
+
+            return authorities;
         });
         return converter;
     }

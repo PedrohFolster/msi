@@ -11,16 +11,15 @@ public class UsuarioAutenticarDTO {
     private String senha;
 
     @NotBlank
-    private String perfil;
-
+    private String role;
     public UsuarioAutenticarDTO() {
     }
 
-    public UsuarioAutenticarDTO(Long id, String email, String senha, String perfil) {
+    public UsuarioAutenticarDTO(Long id, String email, String senha, String role) {
         this.id = id;
         this.email = email;
         this.senha = senha;
-        this.perfil = perfil;
+        this.role = role;
     }
 
     public Long getId() {
@@ -47,11 +46,11 @@ public class UsuarioAutenticarDTO {
         this.senha = senha;
     }
 
-    public String getPerfil() {
-        return perfil;
+    public String getRole() {
+        return role;
     }
 
-    public void setPerfil(String perfil) {
-        this.perfil = perfil;
+    public void setRole(String role) {
+        this.role = role;
     }
 }

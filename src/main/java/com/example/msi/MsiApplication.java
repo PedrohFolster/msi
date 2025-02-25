@@ -1,5 +1,7 @@
 package com.example.msi;
 
+import java.time.LocalDate;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,8 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.msi.entities.Usuario;
 import com.example.msi.repository.UsuarioRepository;
-
-import java.time.LocalDate;
 
 @SpringBootApplication
 public class MsiApplication {

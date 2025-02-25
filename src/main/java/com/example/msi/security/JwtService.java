@@ -30,11 +30,12 @@ public class JwtService {
     public String generateToken(Authentication authentication) {
         Instant now = ZonedDateTime.now(ZoneId.of("America/Sao_Paulo")).toInstant();
         long expiry = 36000L;
-
+    
+        // Obtém as roles do usuário
         String scope = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(" "));
-
+                .collect(Collectors.joining(" ")); // Concatena as roles em uma string
+    
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("msi")
                 .issuedAt(now)
@@ -42,7 +43,7 @@ public class JwtService {
                 .subject(authentication.getName())
                 .claim("scope", scope) // Adiciona as permissões ao token
                 .build();
-
+    
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
 

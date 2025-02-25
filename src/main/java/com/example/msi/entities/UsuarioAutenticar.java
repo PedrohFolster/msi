@@ -17,25 +17,25 @@ public class UsuarioAutenticar {
 
     private String email;
     private String senha;
-    private String perfil;
+    private String role;
 
-    public UsuarioAutenticar(Long id, String email, String senha, String perfil) {
+    public UsuarioAutenticar(Long id, String email, String senha, String role) {
         this.id = id;
         this.email = email;
         this.senha = Hashing.hash(senha);
-        this.perfil = perfil;
+        this.role = role;
     }
 
     public UsuarioAutenticar(UsuarioAutenticarDTO dto) {
         this.id = dto.getId();
         this.email = dto.getEmail();
         this.senha = Hashing.hash(dto.getSenha());
-        this.perfil = dto.getPerfil();
+        this.role = dto.getRole();
     }
 
     public UsuarioAutenticar() {
     }
-    
+
     public Long getId() {
         return id;
     }
@@ -54,10 +54,10 @@ public class UsuarioAutenticar {
     public void setSenha(String senha) {
         this.senha = senha;
     }
-    public String getPerfil() {
-        return perfil;
+    public String getRole() {
+        return role;
     }
-    public void setPerfil(String perfil) {
-        this.perfil = perfil;
+    public void setRole(String role) {
+        this.role = role;
     }
 }

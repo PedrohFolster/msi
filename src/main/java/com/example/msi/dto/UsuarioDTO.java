@@ -1,10 +1,11 @@
 package com.example.msi.dto;
 
+import java.time.LocalDate;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
-import java.time.LocalDate;
 
 public class UsuarioDTO {
 
@@ -24,7 +25,7 @@ public class UsuarioDTO {
     @NotBlank
     private String senha;
 
-    private String role;
+    private String role; // Mantenha como role
 
     public UsuarioDTO() {}
 
@@ -34,7 +35,7 @@ public class UsuarioDTO {
         this.email = email;
         this.dataNascimento = dataNascimento;
         this.senha = senha;
-        this.role = role;
+        this.role = role; // Mantenha como role
     }
 
     // Getters e Setters
@@ -78,11 +79,11 @@ public class UsuarioDTO {
         this.senha = senha;
     }
 
-    public String getRole() {
+    public String getRole() { // Mantenha como role
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(String role) { // Mantenha como role
         this.role = role;
     }
 }

@@ -4,46 +4,26 @@ import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
 
 @Entity
-@Table(name = "usuarios")
 public class Usuario {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
     private String nome;
-
-    @Column(nullable = false, unique = true)
     private String email;
-
-    @Column(nullable = false)
     private LocalDate dataNascimento;
 
     @JsonIgnore
-    @Column(nullable = false)
     private String senha;
 
-    @ManyToOne
-    @JoinColumn(name = "status_id")
-    private UserStatus status;
+    private String role; // Campo para armazenar o papel do usuário
 
-    @Column(nullable = false)
-    private String role;
-
-    // Construtores, getters e setters
-    public Usuario() {}
-
+    // Getters e Setters
     public Long getId() {
         return id;
     }
@@ -84,19 +64,11 @@ public class Usuario {
         this.senha = senha;
     }
 
-    public UserStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(UserStatus status) {
-        this.status = status;
-    }
-
     public String getRole() {
-        return role;
+        return role; // Getter para o papel do usuário
     }
 
     public void setRole(String role) {
-        this.role = role;
+        this.role = role; // Setter para o papel do usuário
     }
-} 
+}
