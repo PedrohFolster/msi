@@ -52,12 +52,7 @@ public class UsuarioAutenticar {
         return senha;
     }
     public void setSenha(String senha) {
-        // Verifica se a senha já está codificada (começa com $2a$)
-        if (senha != null && senha.startsWith("$2a$")) {
-            this.senha = senha;
-        } else {
-            this.senha = Hashing.hash(senha);
-        }
+        this.senha = senha;
     }
     public String getPerfil() {
         return perfil;

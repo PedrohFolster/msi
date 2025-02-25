@@ -46,13 +46,17 @@ public class UsuarioService {
             : "ROLE_USER";
         usuario.setRole(role);
 
+        // Codifica a senha usando BCrypt
+        String senhaEncoded = passwordEncoder.encode(dto.getSenha());
+        usuario.setSenha(senhaEncoded);
+
         // Salva o usuário principal
         usuario = repository.save(usuario);
         
         // Cria e salva o usuário para autenticação
         UsuarioAutenticar usuarioAuth = new UsuarioAutenticar();
         usuarioAuth.setEmail(usuario.getEmail());
-        usuarioAuth.setSenha(usuario.getSenha()); // Já está codificada
+        usuarioAuth.setSenha(senhaEncoded); // Usa a mesma senha codificada
         usuarioAuth.setPerfil(usuario.getRole());
         
         autenticarRepository.save(usuarioAuth);
@@ -107,7 +111,7 @@ public class UsuarioService {
         usuario.setNome(dto.getNome());
         usuario.setEmail(dto.getEmail());
         usuario.setDataNascimento(dto.getDataNascimento());
-        usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
+        // A senha será codificada separadamente
     }
 
     public boolean existsByRole(String role) {
