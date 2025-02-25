@@ -90,23 +90,35 @@ public class UsuarioService {
     }
 
     @Transactional
-    public void deletar(Long id) {
-        // Busca o usuário pelo ID
+    public void inativar(Long id) {
         Usuario usuario = repository.findById(id)
                 .orElseThrow(() -> new UsuarioException.UsuarioNaoEncontradoException("Usuário não encontrado"));
         
         // Atribui a role "ROLE_DELETED" ao usuário
-        usuario.setRole("ROLE_DELETED"); // Define a role como deleted
-        
-        // Atualiza a instância de UsuarioAutenticar correspondente
+        usuario.setRole("ROLE_DELETED");
+
         UsuarioAutenticar usuarioAutenticar = autenticarRepository.findByEmail(usuario.getEmail())
                 .orElseThrow(() -> new UsuarioException.UsuarioNaoEncontradoException("Usuário de autenticação não encontrado"));
         
-        usuarioAutenticar.setRole("ROLE_DELETED"); // Atualiza a role no UsuarioAutenticar
-        autenticarRepository.save(usuarioAutenticar); // Salva a alteração no banco de dados
+        usuarioAutenticar.setRole("ROLE_DELETED");
+        autenticarRepository.save(usuarioAutenticar);
     
-        repository.save(usuario); // Salva a alteração no banco de dados
+        repository.save(usuario);
     }
+
+        // Método para deletar um usuário do banco de dados
+        @Transactional
+        public void deletar(Long id) {
+            Usuario usuario = repository.findById(id)
+                    .orElseThrow(() -> new UsuarioException.UsuarioNaoEncontradoException("Usuário não encontrado"));
+    
+            UsuarioAutenticar usuarioAutenticar = autenticarRepository.findByEmail(usuario.getEmail())
+                    .orElseThrow(() -> new UsuarioException.UsuarioNaoEncontradoException("Usuário de autenticação não encontrado"));
+    
+            autenticarRepository.delete(usuarioAutenticar);
+    
+            repository.delete(usuario);
+        }
 
     private void validarCamposObrigatorios(UsuarioDTO dto) {
         if (dto.getNome() == null || dto.getNome().trim().isEmpty()) {
