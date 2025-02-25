@@ -95,12 +95,24 @@ public class UsuarioService {
         validarCamposObrigatorios(dto);
         Usuario usuario = buscarPorId(id);
         
+        // Busca o UsuarioAutenticar antes de alterar o email
+        UsuarioAutenticar usuarioAutenticar = autenticarRepository.findByEmail(usuario.getEmail())
+                .orElseThrow(() -> new UsuarioException.UsuarioNaoEncontradoException("Usuário de autenticação não encontrado"));
+        
         if (!usuario.getEmail().equals(dto.getEmail()) && repository.existsByEmail(dto.getEmail())) {
             throw new UsuarioException.EmailJaExisteException("Email já cadastrado");
         }
 
         preencherUsuario(usuario, dto);
-        return repository.save(usuario);
+        usuario = repository.save(usuario);
+
+        // Atualiza o UsuarioAutenticar
+        usuarioAutenticar.setEmail(usuario.getEmail());
+        usuarioAutenticar.setSenha(passwordEncoder.encode(dto.getSenha()));
+        usuarioAutenticar.setRole(usuario.getRole());
+        autenticarRepository.save(usuarioAutenticar);
+
+        return usuario;
     }
 
     @Transactional
