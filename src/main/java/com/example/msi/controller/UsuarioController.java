@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,6 +21,7 @@ import com.example.msi.dto.UsuarioDTO;
 import com.example.msi.dto.UsuarioResponseDTO;
 import com.example.msi.entities.Usuario;
 import com.example.msi.service.UsuarioService;
+import com.example.msi.exception.UsuarioException;
 
 import jakarta.validation.Valid;
 
@@ -45,8 +47,14 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public Usuario atualizar(@PathVariable Long id, @RequestBody @Valid UsuarioDTO dto) {
-        return service.atualizar(id, dto);
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")  // Permite tanto USER quanto ADMIN acessarem
+    public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody @Valid UsuarioDTO dto) {
+        try {
+            Usuario usuario = service.atualizar(id, dto);
+            return ResponseEntity.ok(usuario);
+        } catch (UsuarioException.PermissaoNegadaException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Apenas administradores podem alterar roles");
+        }
     }
 
     @PostMapping("/inativar/{id}")

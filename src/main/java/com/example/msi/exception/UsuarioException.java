@@ -33,4 +33,10 @@ public class UsuarioException extends RuntimeException {
     public UsuarioException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    public static class PermissaoNegadaException extends RuntimeException {
+        public PermissaoNegadaException(String message) {
+            super(message);
+        }
+    }
 } 

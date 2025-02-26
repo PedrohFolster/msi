@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,22 +80,41 @@ public class UsuarioService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public Usuario atualizar(Long id, UsuarioDTO dto) {
         validarCamposObrigatorios(dto);
-        Usuario usuario = buscarPorId(id);
+        Usuario usuarioExistente = buscarPorId(id);
         
-        UsuarioAutenticar usuarioAutenticar = autenticarRepository.findByEmail(usuario.getEmail())
+        // Verifica se está tentando alterar a role
+        if (dto.getRole() != null && !dto.getRole().equals(usuarioExistente.getRole())) {
+            // Obtém o usuário autenticado
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            boolean isAdmin = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            
+            if (!isAdmin) {
+                throw new UsuarioException.PermissaoNegadaException("Apenas administradores podem alterar roles");
+            }
+        }
+        
+        UsuarioAutenticar usuarioAutenticar = autenticarRepository.findByEmail(usuarioExistente.getEmail())
                 .orElseThrow(() -> new UsuarioException.UsuarioNaoEncontradoException("Usuário de autenticação não encontrado"));
         
-        if (!usuario.getEmail().equals(dto.getEmail()) && repository.existsByEmail(dto.getEmail())) {
+        if (!usuarioExistente.getEmail().equals(dto.getEmail()) && repository.existsByEmail(dto.getEmail())) {
             throw new UsuarioException.EmailJaExisteException("Email já cadastrado");
         }
 
-        preencherUsuario(usuario, dto);
-        usuario = repository.save(usuario);
-        atualizarUsuarioAutenticar(usuario, usuarioAutenticar, dto.getSenha());
+        preencherUsuario(usuarioExistente, dto);
         
-        return usuario;
+        // Se for admin, permite alterar a role
+        if (dto.getRole() != null) {
+            usuarioExistente.setRole(determinarRole(dto.getRole()));
+        }
+        
+        usuarioExistente = repository.save(usuarioExistente);
+        atualizarUsuarioAutenticar(usuarioExistente, usuarioAutenticar, dto.getSenha());
+        
+        return usuarioExistente;
     }
 
     @Transactional

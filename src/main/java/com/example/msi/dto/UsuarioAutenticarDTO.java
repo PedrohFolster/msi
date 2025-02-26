@@ -10,8 +10,8 @@ public class UsuarioAutenticarDTO {
     private String email;
     private String senha;
 
-    @NotBlank
     private String role;
+
     public UsuarioAutenticarDTO() {
     }
 
