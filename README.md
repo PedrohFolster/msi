@@ -98,6 +98,7 @@ O projeto possui um manipulador global de exceções que retorna respostas aprop
 8. Para realizar as requisições para os demais endpoint's deve ser adicionado no Header `Authorization` e o value `Baerer SeuTokenAoRealizarLogin`.
 
 **IMPORTANTE:** Segue abaixo os comandos para realizar a criação da chave pública e privada:
+- Crie o `app.key e app.pub`
 - cd caminho/para/seu/projeto
 - Gerar chave privada: openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out app.key 
 - Extrair chave pública: openssl rsa -pubout -in app.key -out app.pub
