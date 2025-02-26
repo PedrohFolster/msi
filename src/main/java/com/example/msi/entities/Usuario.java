@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Column;
 
 @Entity
 public class Usuario {
@@ -23,6 +24,9 @@ public class Usuario {
 
     private String role;
 
+    @JsonIgnore
+    @Column(length = 1000)
+    private String tokenAtual;
 
     public Long getId() {
         return id;
@@ -70,5 +74,13 @@ public class Usuario {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getTokenAtual() {
+        return tokenAtual;
+    }
+
+    public void setTokenAtual(String tokenAtual) {
+        this.tokenAtual = tokenAtual;
     }
 }

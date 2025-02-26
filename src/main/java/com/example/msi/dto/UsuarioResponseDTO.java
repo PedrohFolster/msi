@@ -15,7 +15,6 @@ public class UsuarioResponseDTO {
         this.role = role;
     }
 
-    // Getters e Setters
     public Long getId() {
         return id;
     }
