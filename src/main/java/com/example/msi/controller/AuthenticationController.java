@@ -35,16 +35,29 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody @Valid UsuarioAutenticarDTO loginDTO) {
+        System.out.println("Tentativa de login para usuário: " + loginDTO.getEmail());
+        
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getSenha())
         );
     
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         if (userDetails.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_DELETED"))) {
+            System.out.println("Tentativa de login de usuário inativo: " + loginDTO.getEmail());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Usuário inativo ou deletado");
         }
     
         String token = authService.authenticate(authentication);
+        System.out.println("Token gerado para usuário: " + loginDTO.getEmail());
+        
+        // Salva o novo token no usuário
+        Usuario usuario = usuarioService.buscarPorEmail(loginDTO.getEmail());
+        if (usuario != null) {
+            usuario.setTokenAtual(token);
+            usuarioService.salvar(usuario);
+            System.out.println("Token salvo para usuário: " + loginDTO.getEmail());
+        }
+    
         return ResponseEntity.ok(token);
     }
 

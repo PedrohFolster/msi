@@ -16,10 +16,14 @@ import com.example.msi.dto.UsuarioDTO;
 import com.example.msi.dto.UsuarioResponseDTO;
 import com.example.msi.entities.Usuario;
 import com.example.msi.entities.UsuarioAutenticar;
+import com.example.msi.entities.TokenRevogado;
 import com.example.msi.exception.UsuarioException;
 import com.example.msi.exception.UsuarioValidationException;
 import com.example.msi.repository.UsuarioAutenticarRepository;
 import com.example.msi.repository.UsuarioRepository;
+import com.example.msi.repository.TokenRevogadoRepository;
+import com.example.msi.security.JwtService;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class UsuarioService {
@@ -27,14 +31,23 @@ public class UsuarioService {
     private final UsuarioRepository repository;
     private final UsuarioAutenticarRepository autenticarRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final HttpServletRequest request;
+    private final TokenRevogadoRepository tokenRevogadoRepository;
 
     @Autowired
     public UsuarioService(UsuarioRepository repository, 
                          UsuarioAutenticarRepository autenticarRepository,
-                         PasswordEncoder passwordEncoder) {
+                         PasswordEncoder passwordEncoder,
+                         JwtService jwtService,
+                         HttpServletRequest request,
+                         TokenRevogadoRepository tokenRevogadoRepository) {
         this.repository = repository;
         this.autenticarRepository = autenticarRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.request = request;
+        this.tokenRevogadoRepository = tokenRevogadoRepository;
     }
 
     @Transactional
@@ -85,6 +98,8 @@ public class UsuarioService {
         validarCamposObrigatorios(dto);
         Usuario usuarioExistente = buscarPorId(id);
         
+        boolean precisaRevogarToken = false;
+        
         // Verifica se está tentando alterar a role
         if (dto.getRole() != null && !dto.getRole().equals(usuarioExistente.getRole())) {
             // Obtém o usuário autenticado
@@ -95,13 +110,18 @@ public class UsuarioService {
             if (!isAdmin) {
                 throw new UsuarioException.PermissaoNegadaException("Apenas administradores podem alterar roles");
             }
+            precisaRevogarToken = true;
         }
         
         UsuarioAutenticar usuarioAutenticar = autenticarRepository.findByEmail(usuarioExistente.getEmail())
                 .orElseThrow(() -> new UsuarioException.UsuarioNaoEncontradoException("Usuário de autenticação não encontrado"));
         
-        if (!usuarioExistente.getEmail().equals(dto.getEmail()) && repository.existsByEmail(dto.getEmail())) {
-            throw new UsuarioException.EmailJaExisteException("Email já cadastrado");
+        // Verifica se o email está sendo alterado
+        if (!usuarioExistente.getEmail().equals(dto.getEmail())) {
+            if (repository.existsByEmail(dto.getEmail())) {
+                throw new UsuarioException.EmailJaExisteException("Email já cadastrado");
+            }
+            precisaRevogarToken = true;
         }
 
         preencherUsuario(usuarioExistente, dto);
@@ -114,6 +134,12 @@ public class UsuarioService {
         usuarioExistente = repository.save(usuarioExistente);
         atualizarUsuarioAutenticar(usuarioExistente, usuarioAutenticar, dto.getSenha());
         
+        // Revoga o token atual e gera um novo apenas se necessário
+        if (precisaRevogarToken) {
+            String novoToken = jwtService.generateToken(SecurityContextHolder.getContext().getAuthentication());
+            atualizarToken(usuarioExistente, novoToken);
+        }
+        
         return usuarioExistente;
     }
 
@@ -121,6 +147,13 @@ public class UsuarioService {
     public void inativar(Long id) {
         Usuario usuario = buscarPorId(id);
         usuario.setRole("ROLE_DELETED");
+
+        // Revoga o token atual
+        if (usuario.getTokenAtual() != null) {
+            TokenRevogado tokenRevogado = new TokenRevogado(usuario.getTokenAtual());
+            tokenRevogadoRepository.save(tokenRevogado);
+            usuario.setTokenAtual(null);
+        }
 
         UsuarioAutenticar usuarioAutenticar = autenticarRepository.findByEmail(usuario.getEmail())
                 .orElseThrow(() -> new UsuarioException.UsuarioNaoEncontradoException("Usuário de autenticação não encontrado"));
@@ -133,6 +166,13 @@ public class UsuarioService {
     @Transactional
     public void deletar(Long id) {
         Usuario usuario = buscarPorId(id);
+        
+        // Revoga o token atual
+        if (usuario.getTokenAtual() != null) {
+            TokenRevogado tokenRevogado = new TokenRevogado(usuario.getTokenAtual());
+            tokenRevogadoRepository.save(tokenRevogado);
+        }
+
         UsuarioAutenticar usuarioAutenticar = autenticarRepository.findByEmail(usuario.getEmail())
                 .orElseThrow(() -> new UsuarioException.UsuarioNaoEncontradoException("Usuário de autenticação não encontrado"));
 
@@ -192,5 +232,24 @@ public class UsuarioService {
 
     public boolean existsByRole(String role) {
         return repository.existsByRole(role);
+    }
+
+    private void atualizarToken(Usuario usuario, String novoToken) {
+        String tokenAntigo = usuario.getTokenAtual();
+        if (tokenAntigo != null) {
+            TokenRevogado tokenRevogado = new TokenRevogado(tokenAntigo);
+            tokenRevogadoRepository.save(tokenRevogado);
+        }
+        usuario.setTokenAtual(novoToken);
+        repository.save(usuario);
+    }
+
+    public Usuario buscarPorEmail(String email) {
+        return repository.findByEmail(email)
+            .orElseThrow(() -> new UsuarioException.UsuarioNaoEncontradoException("Usuário não encontrado"));
+    }
+
+    public void salvar(Usuario usuario) {
+        repository.save(usuario);
     }
 }

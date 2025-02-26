@@ -30,6 +30,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -52,17 +54,19 @@ public class SecurityConfig {
     private RSAPrivateKey priv;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, TokenRevogadoFilter tokenRevogadoFilter) throws Exception {
         http
-            .csrf().disable() // Desabilita CSRF para APIs
+            .csrf().disable()
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(PublicUrls.URLS).permitAll()
-                .requestMatchers(HttpMethod.DELETE, "/usuarios/**").hasRole("ADMIN") // Permite apenas para ADMIN no método DELETE
+                .requestMatchers(HttpMethod.DELETE, "/usuarios/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer()
                 .jwt()
-                .jwtAuthenticationConverter(jwtAuthenticationConverter()); // Converte JWT para autenticação
+                .jwtAuthenticationConverter(jwtAuthenticationConverter())
+            .and().and()
+            .addFilterBefore(tokenRevogadoFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -123,5 +127,10 @@ public class SecurityConfig {
             return authorities;
         });
         return converter;
+    }
+
+    @Bean
+    public TokenRevogadoFilter tokenRevogadoFilter(JwtService jwtService) {
+        return new TokenRevogadoFilter(jwtService);
     }
 }
