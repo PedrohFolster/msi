@@ -1,5 +1,7 @@
 package com.example.msi.service;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,8 +12,12 @@ import com.example.msi.util.Hashing;
 @Service
 public class UsuarioAutenticarService {
 
+    private final UsuarioAutenticarRepository usuarioAutenticarRepository;
+
     @Autowired
-    private UsuarioAutenticarRepository usuarioAutenticarRepository;
+    public UsuarioAutenticarService(UsuarioAutenticarRepository usuarioAutenticarRepository) {
+        this.usuarioAutenticarRepository = usuarioAutenticarRepository;
+    }
 
     public boolean authenticate(String email, String senha) {
         UsuarioAutenticar usuarioAutenticar = usuarioAutenticarRepository.findByEmail(email).orElse(null);
@@ -21,7 +27,15 @@ public class UsuarioAutenticarService {
         return false;
     }
 
-    public UsuarioAutenticar findByEmail(String email) {
-        return usuarioAutenticarRepository.findByEmail(email).orElse(null);
+    public Optional<UsuarioAutenticar> buscarPorEmail(String email) {
+        return usuarioAutenticarRepository.findByEmail(email);
+    }
+
+    public void salvar(UsuarioAutenticar usuarioAutenticar) {
+        usuarioAutenticarRepository.save(usuarioAutenticar);
+    }
+
+    public void deletar(UsuarioAutenticar usuarioAutenticar) {
+        usuarioAutenticarRepository.delete(usuarioAutenticar);
     }
 }

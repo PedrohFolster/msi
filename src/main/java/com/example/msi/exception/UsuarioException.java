@@ -29,4 +29,8 @@ public class UsuarioException extends RuntimeException {
     protected UsuarioException(String message) {
         super(message);
     }
+
+    public UsuarioException(String message, Throwable cause) {
+        super(message, cause);
+    }
 } 

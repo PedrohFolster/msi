@@ -46,26 +46,13 @@ public class UsuarioService {
         Usuario usuario = new Usuario();
         preencherUsuario(usuario, dto);
         
-        String role = dto.getRole() != null && dto.getRole().equalsIgnoreCase("admin") 
-            ? "ROLE_ADMIN" 
-            : dto.getRole() != null && dto.getRole().equalsIgnoreCase("deleted") 
-            ? "ROLE_DELETED" 
-            : "ROLE_USER";
-        usuario.setRole(role);
+        usuario.setRole(determinarRole(dto.getRole()));
     
-        // Codifica a senha usando BCrypt
         String senhaEncoded = passwordEncoder.encode(dto.getSenha());
         usuario.setSenha(senhaEncoded);
     
         usuario = repository.save(usuario);
-        
-        // Cria e salva o usuário para autenticação
-        UsuarioAutenticar usuarioAuth = new UsuarioAutenticar();
-        usuarioAuth.setEmail(usuario.getEmail());
-        usuarioAuth.setSenha(senhaEncoded);
-        usuarioAuth.setRole(usuario.getRole());
-        
-        autenticarRepository.save(usuarioAuth);
+        criarUsuarioAutenticar(usuario, senhaEncoded);
         
         return usuario;
     }
@@ -95,7 +82,6 @@ public class UsuarioService {
         validarCamposObrigatorios(dto);
         Usuario usuario = buscarPorId(id);
         
-        // Busca o UsuarioAutenticar antes de alterar o email
         UsuarioAutenticar usuarioAutenticar = autenticarRepository.findByEmail(usuario.getEmail())
                 .orElseThrow(() -> new UsuarioException.UsuarioNaoEncontradoException("Usuário de autenticação não encontrado"));
         
@@ -105,22 +91,14 @@ public class UsuarioService {
 
         preencherUsuario(usuario, dto);
         usuario = repository.save(usuario);
-
-        // Atualiza o UsuarioAutenticar
-        usuarioAutenticar.setEmail(usuario.getEmail());
-        usuarioAutenticar.setSenha(passwordEncoder.encode(dto.getSenha()));
-        usuarioAutenticar.setRole(usuario.getRole());
-        autenticarRepository.save(usuarioAutenticar);
-
+        atualizarUsuarioAutenticar(usuario, usuarioAutenticar, dto.getSenha());
+        
         return usuario;
     }
 
     @Transactional
     public void inativar(Long id) {
-        Usuario usuario = repository.findById(id)
-                .orElseThrow(() -> new UsuarioException.UsuarioNaoEncontradoException("Usuário não encontrado"));
-        
-        // Atribui a role "ROLE_DELETED" ao usuário
+        Usuario usuario = buscarPorId(id);
         usuario.setRole("ROLE_DELETED");
 
         UsuarioAutenticar usuarioAutenticar = autenticarRepository.findByEmail(usuario.getEmail())
@@ -128,16 +106,12 @@ public class UsuarioService {
         
         usuarioAutenticar.setRole("ROLE_DELETED");
         autenticarRepository.save(usuarioAutenticar);
-    
         repository.save(usuario);
     }
 
     @Transactional
     public void deletar(Long id) {
-        Usuario usuario = repository.findById(id)
-                .orElseThrow(() -> new UsuarioException.UsuarioNaoEncontradoException("Usuário não encontrado"));
-
-        // Verifica se o usuário de autenticação existe antes de tentar excluí-lo
+        Usuario usuario = buscarPorId(id);
         UsuarioAutenticar usuarioAutenticar = autenticarRepository.findByEmail(usuario.getEmail())
                 .orElseThrow(() -> new UsuarioException.UsuarioNaoEncontradoException("Usuário de autenticação não encontrado"));
 
@@ -166,7 +140,36 @@ public class UsuarioService {
         usuario.setDataNascimento(dto.getDataNascimento());
     }
 
+    private String determinarRole(String role) {
+        if (role != null) {
+            if (role.equalsIgnoreCase("admin")) {
+                return "ROLE_ADMIN";
+            } else if (role.equalsIgnoreCase("deleted")) {
+                return "ROLE_DELETED";
+            }
+        }
+        return "ROLE_USER";
+    }
+
+    private void criarUsuarioAutenticar(Usuario usuario, String senhaEncoded) {
+        UsuarioAutenticar usuarioAuth = new UsuarioAutenticar();
+        usuarioAuth.setEmail(usuario.getEmail());
+        usuarioAuth.setSenha(senhaEncoded);
+        usuarioAuth.setRole(usuario.getRole());
+        
+        autenticarRepository.save(usuarioAuth);
+    }
+
+    private void atualizarUsuarioAutenticar(Usuario usuario, UsuarioAutenticar usuarioAutenticar, String novaSenha) {
+        usuarioAutenticar.setEmail(usuario.getEmail());
+        if (novaSenha != null && !novaSenha.trim().isEmpty()) {
+            usuarioAutenticar.setSenha(passwordEncoder.encode(novaSenha));
+        }
+        usuarioAutenticar.setRole(usuario.getRole());
+        autenticarRepository.save(usuarioAutenticar);
+    }
+
     public boolean existsByRole(String role) {
         return repository.existsByRole(role);
     }
-} 
+}
