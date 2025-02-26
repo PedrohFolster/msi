@@ -88,7 +88,11 @@ O projeto possui um manipulador global de exceções que retorna respostas aprop
 
 1. Clone o repositório.
 2. Navegue até o diretório do projeto.
+
 3. O banco de dados já está criado ao realizar build do projeto, as informações estão em: `src\main\resources\application.properties`. Como o banco é local e não possui senha, deixei fora do .gitignore, para facilitar a build do projeto.
 4. As chaves RSA deverão ser trocadas, ambas estão localizadas em `src\main\resources`
+
 5. No diretório raiz, execute o `docker-compose up --build`.
 6. Acesse `http://localhost:8080` para interagir com a API.
+7. É importante lembrar que somente as url's: **/auth/login e /auth/register** estão liberadas sem o token jwt.
+8. Para realizar as requisições para os demais endpoint's deve ser adicionado no Header `Authorization` e o value `Baerer SeuTokenAoRealizarLogin`.
