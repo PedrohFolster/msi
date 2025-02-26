@@ -1,33 +1,28 @@
 package com.example.msi.entities;
 
-import jakarta.persistence.*;
 import java.time.LocalDate;
 
-@Entity
-@Table(name = "usuarios")
-public class Usuario {
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
+public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
     private String nome;
-
-    @Column(nullable = false, unique = true)
     private String email;
-
-    @Column(nullable = false)
     private LocalDate dataNascimento;
 
-    @Column(nullable = false)
+    @JsonIgnore
     private String senha;
 
-    @Column(nullable = false)
-    private String role = "ROLE_USER"; // Default role
+    private String role;
 
-    // Construtores, getters e setters
-    public Usuario() {}
 
     public Long getId() {
         return id;
@@ -76,4 +71,4 @@ public class Usuario {
     public void setRole(String role) {
         this.role = role;
     }
-} 
+}

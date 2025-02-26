@@ -1,5 +1,7 @@
 package com.example.msi.service;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,18 +12,30 @@ import com.example.msi.util.Hashing;
 @Service
 public class UsuarioAutenticarService {
 
-    @Autowired
-    private UsuarioAutenticarRepository usuarioAutenticarRepository;
+    private final UsuarioAutenticarRepository usuarioAutenticarRepository;
 
-    public boolean authenticate(String username, String password) {
-        UsuarioAutenticar usuarioAutenticar = usuarioAutenticarRepository.findByLogin(username).orElse(null);
+    @Autowired
+    public UsuarioAutenticarService(UsuarioAutenticarRepository usuarioAutenticarRepository) {
+        this.usuarioAutenticarRepository = usuarioAutenticarRepository;
+    }
+
+    public boolean authenticate(String email, String senha) {
+        UsuarioAutenticar usuarioAutenticar = usuarioAutenticarRepository.findByEmail(email).orElse(null);
         if (usuarioAutenticar != null) {
-            return Hashing.matches(password, usuarioAutenticar.getPassword());
+            return Hashing.matches(senha, usuarioAutenticar.getSenha());
         }
         return false;
     }
 
-    public UsuarioAutenticar findByLogin(String login) {
-        return usuarioAutenticarRepository.findByLogin(login).orElse(null);
+    public Optional<UsuarioAutenticar> buscarPorEmail(String email) {
+        return usuarioAutenticarRepository.findByEmail(email);
+    }
+
+    public void salvar(UsuarioAutenticar usuarioAutenticar) {
+        usuarioAutenticarRepository.save(usuarioAutenticar);
+    }
+
+    public void deletar(UsuarioAutenticar usuarioAutenticar) {
+        usuarioAutenticarRepository.delete(usuarioAutenticar);
     }
 }

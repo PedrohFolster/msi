@@ -7,20 +7,19 @@ public class UsuarioAutenticarDTO {
     private Long id;
 
     @NotBlank
-    private String login;
-    private String password;
+    private String email;
+    private String senha;
 
-    @NotBlank
-    private String perfil;
+    private String role;
 
     public UsuarioAutenticarDTO() {
     }
 
-    public UsuarioAutenticarDTO(Long id, String login, String password, String perfil) {
+    public UsuarioAutenticarDTO(Long id, String email, String senha, String role) {
         this.id = id;
-        this.login = login;
-        this.password = password;
-        this.perfil = perfil;
+        this.email = email;
+        this.senha = senha;
+        this.role = role;
     }
 
     public Long getId() {
@@ -31,27 +30,27 @@ public class UsuarioAutenticarDTO {
         this.id = id;
     }
 
-    public String getLogin() {
-        return login;
+    public String getEmail() {
+        return email;
     }
 
-    public void setLogin(String login) {
-        this.login = login;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public String getPassword() {
-        return password;
+    public String getSenha() {
+        return senha;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setSenha(String senha) {
+        this.senha = senha;
     }
 
-    public String getPerfil() {
-        return perfil;
+    public String getRole() {
+        return role;
     }
 
-    public void setPerfil(String perfil) {
-        this.perfil = perfil;
+    public void setRole(String role) {
+        this.role = role;
     }
 }

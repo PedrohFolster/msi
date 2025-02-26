@@ -1,40 +1,17 @@
 package com.example.msi.dto;
 
-import java.time.LocalDate;
-
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
-
-public class UsuarioDTO {
-
+public class UsuarioResponseDTO {
     private Long id;
-
-    @NotBlank
     private String nome;
-
-    @NotBlank
-    @Email
     private String email;
-
-    @NotNull
-    @Past
-    private LocalDate dataNascimento;
-
-    @NotBlank
-    private String senha;
-
+    private String dataNascimento;
     private String role;
 
-    public UsuarioDTO() {}
-
-    public UsuarioDTO(Long id, String nome, String email, LocalDate dataNascimento, String senha, String role) {
+    public UsuarioResponseDTO(Long id, String nome, String email, String dataNascimento, String role) {
         this.id = id;
         this.nome = nome;
         this.email = email;
         this.dataNascimento = dataNascimento;
-        this.senha = senha;
         this.role = role;
     }
 
@@ -63,20 +40,12 @@ public class UsuarioDTO {
         this.email = email;
     }
 
-    public LocalDate getDataNascimento() {
+    public String getDataNascimento() {
         return dataNascimento;
     }
 
-    public void setDataNascimento(LocalDate dataNascimento) {
+    public void setDataNascimento(String dataNascimento) {
         this.dataNascimento = dataNascimento;
-    }
-
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
     }
 
     public String getRole() {
@@ -86,4 +55,4 @@ public class UsuarioDTO {
     public void setRole(String role) {
         this.role = role;
     }
-}
+} 

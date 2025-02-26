@@ -9,5 +9,5 @@ import com.example.msi.entities.UsuarioAutenticar;
 
 @Repository
 public interface UsuarioAutenticarRepository extends JpaRepository<UsuarioAutenticar, Long> {
-    Optional<UsuarioAutenticar> findByLogin(String login);
+    Optional<UsuarioAutenticar> findByEmail(String email);
 }

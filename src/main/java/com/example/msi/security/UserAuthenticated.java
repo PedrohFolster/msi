@@ -2,6 +2,7 @@ package com.example.msi.security;
 
 import java.util.Collection;
 import java.util.List;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,21 +19,21 @@ public class UserAuthenticated implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        String perfil = usuario.getPerfil();
-        if (perfil == null || perfil.trim().isEmpty()) {
-            throw new IllegalArgumentException("Perfil não pode ser nulo ou vazio");
+        String role = usuario.getRole();
+        if (role == null || role.trim().isEmpty()) {
+            throw new IllegalArgumentException("Role não pode ser nulo ou vazio");
         }
-        return List.of(new SimpleGrantedAuthority(perfil));
+        return List.of(new SimpleGrantedAuthority(role));
     }
 
     @Override
     public String getPassword() {
-        return usuario.getPassword();
+        return usuario.getSenha();
     }
 
     @Override
     public String getUsername() {
-        return usuario.getLogin();
+        return usuario.getEmail();
     }
 
     @Override
@@ -52,6 +53,6 @@ public class UserAuthenticated implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return !usuario.getRole().equals("ROLE_DELETED");
     }
 }

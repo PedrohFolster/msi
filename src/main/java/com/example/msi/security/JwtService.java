@@ -15,31 +15,27 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
-import com.example.msi.entities.UsuarioAutenticar;
-import com.example.msi.service.UsuarioAutenticarService;
-
 @Service
 public class JwtService {
 
     private final JwtEncoder jwtEncoder;
     private final JwtDecoder jwtDecoder;
-    private final UsuarioAutenticarService usuarioAutenticarService;
 
     @Autowired
-    public JwtService(JwtEncoder jwtEncoder, JwtDecoder jwtDecoder, UsuarioAutenticarService usuarioAutenticarService) {
+    public JwtService(JwtEncoder jwtEncoder, JwtDecoder jwtDecoder) {
         this.jwtEncoder = jwtEncoder;
         this.jwtDecoder = jwtDecoder;
-        this.usuarioAutenticarService = usuarioAutenticarService;
     }
 
     public String generateToken(Authentication authentication) {
         Instant now = ZonedDateTime.now(ZoneId.of("America/Sao_Paulo")).toInstant();
         long expiry = 36000L;
-
+    
+        // Obtém as roles do usuário
         String scope = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(" "));
-
+    
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("msi")
                 .issuedAt(now)
@@ -47,7 +43,7 @@ public class JwtService {
                 .subject(authentication.getName())
                 .claim("scope", scope)
                 .build();
-
+    
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
 

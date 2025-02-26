@@ -1,9 +1,11 @@
 package com.example.msi.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,17 +34,23 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UsuarioAutenticarDTO loginDTO) {
+    public ResponseEntity<String> login(@RequestBody @Valid UsuarioAutenticarDTO loginDTO) {
         Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(loginDTO.getLogin(), loginDTO.getPassword())
+            new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getSenha())
         );
-        
+    
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        if (userDetails.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_DELETED"))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Usuário inativo ou deletado");
+        }
+    
         String token = authService.authenticate(authentication);
         return ResponseEntity.ok(token);
     }
 
     @PostMapping("/register")
-    public Usuario register(@RequestBody @Valid UsuarioDTO usuarioDTO) {
-        return usuarioService.criar(usuarioDTO);
+    public ResponseEntity<Usuario> register(@RequestBody @Valid UsuarioDTO usuarioDTO) {
+        Usuario novoUsuario = usuarioService.criar(usuarioDTO);
+        return ResponseEntity.status(201).body(novoUsuario);
     }
 }
