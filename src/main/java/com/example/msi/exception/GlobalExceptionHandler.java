@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -65,12 +66,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<Map<String, String>> handleAuthenticationException(AuthenticationException ex) {
+    @ExceptionHandler({AuthenticationException.class, UsernameNotFoundException.class})
+    public ResponseEntity<Map<String, String>> handleAuthenticationException(Exception ex) {
         Map<String, String> errors = new HashMap<>();
         
         if (ex instanceof BadCredentialsException) {
             errors.put("error", "Credenciais inválidas");
+        } else if (ex.getMessage().contains("User is disabled")) {
+            errors.put("error", "Usuário está inativo ou foi excluído do sistema");
         } else {
             errors.put("error", "Erro de autenticação: " + ex.getMessage());
         }

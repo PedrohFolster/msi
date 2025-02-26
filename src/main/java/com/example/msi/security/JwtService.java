@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.msi.entities.TokenRevogado;
 import com.example.msi.repository.TokenRevogadoRepository;
+import com.example.msi.config.JwtConfig;
 
 @Service
 public class JwtService {
@@ -24,17 +25,19 @@ public class JwtService {
     private final JwtEncoder jwtEncoder;
     private final JwtDecoder jwtDecoder;
     private final TokenRevogadoRepository tokenRevogadoRepository;
+    private final JwtConfig jwtConfig;
 
     @Autowired
-    public JwtService(JwtEncoder jwtEncoder, JwtDecoder jwtDecoder, TokenRevogadoRepository tokenRevogadoRepository) {
+    public JwtService(JwtEncoder jwtEncoder, JwtDecoder jwtDecoder, TokenRevogadoRepository tokenRevogadoRepository, JwtConfig jwtConfig) {
         this.jwtEncoder = jwtEncoder;
         this.jwtDecoder = jwtDecoder;
         this.tokenRevogadoRepository = tokenRevogadoRepository;
+        this.jwtConfig = jwtConfig;
     }
 
     public String generateToken(Authentication authentication) {
         Instant now = ZonedDateTime.now(ZoneId.of("America/Sao_Paulo")).toInstant();
-        long expiry = 36000L;
+        long expiry = jwtConfig.getExpirySeconds();
     
         String scope = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)

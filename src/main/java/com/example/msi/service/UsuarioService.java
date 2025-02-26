@@ -134,7 +134,7 @@ public class UsuarioService {
         usuarioExistente = repository.save(usuarioExistente);
         atualizarUsuarioAutenticar(usuarioExistente, usuarioAutenticar, dto.getSenha());
         
-        // Revoga o token atual e gera um novo apenas se necessário
+        // Revoga o token atual e gera um novo
         if (precisaRevogarToken) {
             String novoToken = jwtService.generateToken(SecurityContextHolder.getContext().getAuthentication());
             atualizarToken(usuarioExistente, novoToken);

@@ -37,7 +37,7 @@ public class UsuarioController {
 
     @GetMapping
     public List<UsuarioResponseDTO> listarTodos(@RequestParam(defaultValue = "1") int page) {
-        Pageable pageable = PageRequest.of(page - 1, 5); // Retorna 5 usuários
+        Pageable pageable = PageRequest.of(page - 1, 5);
         return service.listarTodosResponse(pageable);
     }
 
@@ -64,7 +64,6 @@ public class UsuarioController {
         return ResponseEntity.ok("Usuário inativado com sucesso.");
     }
 
-    // Endpoint para excluir um usuário do banco
     @DeleteMapping("/excluir/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> excluirUsuario(@PathVariable Long id) {

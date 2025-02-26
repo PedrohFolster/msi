@@ -56,7 +56,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, TokenRevogadoFilter tokenRevogadoFilter) throws Exception {
         http
-            .csrf().disable()
+            .csrf(csrf -> csrf.disable())
+            .headers(headers -> headers.frameOptions().disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(PublicUrls.URLS).permitAll()
                 .requestMatchers(HttpMethod.DELETE, "/usuarios/**").hasRole("ADMIN")
