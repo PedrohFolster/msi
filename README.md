@@ -102,3 +102,6 @@ O projeto possui um manipulador global de exceções que retorna respostas aprop
 - cd caminho/para/seu/projeto
 - Gerar chave privada: openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out app.key 
 - Extrair chave pública: openssl rsa -pubout -in app.key -out app.pub
+
+9. Visualização do banco de dados: `http://localhost:8080/h2-console/`
+10. As informações para login estão em: `src\main\resources\application.properties`
