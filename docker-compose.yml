@@ -11,5 +11,4 @@ services:
       - SPRING_DATASOURCE_USERNAME=sa
       - SPRING_DATASOURCE_PASSWORD=
     volumes:
-      - ./src/main/resources/app.key:/app/src/main/resources/app.key
-      - ./src/main/resources/app.pub:/app/src/main/resources/app.pub 
+      - ./src/main/resources:/keys 
