@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Arquivos de configuração do projeto
+src/main/resources/app.key
+src/main/resources/app.pub
