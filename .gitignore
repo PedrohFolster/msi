@@ -35,4 +35,4 @@ build/
 # Arquivos de configuração do projeto
 src/main/resources/app.key
 src/main/resources/app.pub
-src\main\resources\application.properties
+src/main/resources/application.properties
