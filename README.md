@@ -16,7 +16,7 @@ Este é um projeto de backend desenvolvido em Java utilizando o framework Spring
 
 ### Banco de Dados
 
-O projeto utiliza o banco de dados H2 em memória para desenvolvimento e testes. As configurações do banco de dados estão no arquivo `application.properties`.
+O projeto utiliza o banco de dados H2 em memória para desenvolvimento e testes. As configurações do banco de dados estão no arquivo `src\main\resources\.env.example`.
 
 ### Segurança
 
@@ -89,7 +89,7 @@ O projeto possui um manipulador global de exceções que retorna respostas aprop
 1. Clone o repositório.
 2. Navegue até o diretório do projeto.
 
-3. O banco de dados já está criado ao realizar build do projeto, as informações estão em: `src\main\resources\application.properties`. Como o banco é local e não possui senha, deixei fora do .gitignore, para facilitar a build do projeto.
+3. O banco de dados deve ser criado para realizar a build do projeto, as informações estão em: `src\main\resources\.env.example`.
 4. As chaves de segurança são criadas automaticamente quando executa o `docker-compose up --build`
    
 5. No diretório raiz, execute o `docker-compose up --build`.
@@ -104,4 +104,4 @@ O projeto possui um manipulador global de exceções que retorna respostas aprop
 - Extrair chave pública: openssl rsa -pubout -in app.key -out app.pub
 
 9. Visualização do banco de dados: `http://localhost:8080/h2-console/`
-10. As informações para login estão em: `src\main\resources\application.properties`
+10. As informações para login estão em: `src\main\resources\.env.example`
