@@ -12,13 +12,14 @@ import java.time.LocalDateTime;
 public class TokenLimpezaService {
 
     private final TokenRevogadoRepository tokenRevogadoRepository;
+    private static final long DEZ_HORAS_EM_MS = 36000000; // 10 horas em milissegundos
 
     @Autowired
     public TokenLimpezaService(TokenRevogadoRepository tokenRevogadoRepository) {
         this.tokenRevogadoRepository = tokenRevogadoRepository;
     }
 
-    @Scheduled(fixedRate = 36000000) // Executa a cada 10 horas (36000000 ms)
+    @Scheduled(initialDelay = DEZ_HORAS_EM_MS, fixedDelay = DEZ_HORAS_EM_MS)
     @Transactional
     public void limparTokensExpirados() {
         LocalDateTime limiteExpiracao = LocalDateTime.now().minusHours(10);
